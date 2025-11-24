@@ -131,68 +131,6 @@ Repeat for other services as needed.
 
 **Models:** `Search`
 
-## 🔧 Configuration
-
-### Environment Variables
-
-Each service requires a `.env` file in its root directory. Create them based on the following templates:
-
-#### API Gateway (.env)
-```env
-PORT=3000
-JWT_SECRET=your_jwt_secret_key
-REDIS_URL=redis://redis:6379
-RABBITMQ_URL=amqp://rabbitmq:5672
-
-# Service URLs
-IDENTITY_SERVICE_URL=http://identity-service:4001
-POST_SERVICE_URL=http://post-service:4002
-MEDIA_SERVICE_URL=http://media-service:4003
-SEARCH_SERVICE_URL=http://search-service:4004
-```
-
-#### Identity Service (.env)
-```env
-PORT=4001
-MONGODB_URI=mongodb://localhost:27017/identity-db
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRES_IN=15m
-REFRESH_TOKEN_EXPIRES_IN=7d
-REDIS_URL=redis://redis:6379
-RABBITMQ_URL=amqp://rabbitmq:5672
-```
-
-#### Post Service (.env)
-```env
-PORT=4002
-MONGODB_URI=mongodb://localhost:27017/post-db
-JWT_SECRET=your_jwt_secret_key
-REDIS_URL=redis://redis:6379
-RABBITMQ_URL=amqp://rabbitmq:5672
-```
-
-#### Media Service (.env)
-```env
-PORT=4003
-MONGODB_URI=mongodb://localhost:27017/media-db
-JWT_SECRET=your_jwt_secret_key
-REDIS_URL=redis://redis:6379
-RABBITMQ_URL=amqp://rabbitmq:5672
-
-# Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-```
-
-#### Search Service (.env)
-```env
-PORT=4004
-MONGODB_URI=mongodb://localhost:27017/search-db
-JWT_SECRET=your_jwt_secret_key
-REDIS_URL=redis://redis:6379
-RABBITMQ_URL=amqp://rabbitmq:5672
-```
 
 ## 📡 API Endpoints
 
