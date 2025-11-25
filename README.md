@@ -6,7 +6,7 @@ A scalable microservices-based application built with Node.js, Express, MongoDB,
 
 This application consists of five core microservices:
 
-- **API Gateway** - Entry point for all client requests, handles routing and rate limiting
+- **API Gateway** - Entry point for all client requests, handles routing and IP rate limiting
 - **Identity Service** - User authentication, authorization, and token management
 - **Post Service** - Manages user posts and publishes events to other services
 - **Media Service** - Handles media uploads via Cloudinary and processes media-related events
