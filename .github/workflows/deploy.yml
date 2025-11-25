@@ -1,0 +1,152 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Create .env files
+        run: |
+          # API Gateway .env
+          echo "PORT=${{ secrets.API_GATEWAY_PORT }}" > api-gateway/.env
+          echo "NODE_ENV=production" >> api-gateway/.env
+          echo "IDENTITY_SERVICE_URL=${{ secrets.IDENTITY_SERVICE_URL }}" >> api-gateway/.env
+          echo "POST_SERVICE_URL=${{ secrets.POST_SERVICE_URL }}" >> api-gateway/.env
+          echo "MEDIA_SERVICE_URL=${{ secrets.MEDIA_SERVICE_URL }}" >> api-gateway/.env
+          echo "SEARCH_SERVICE_URL=${{ secrets.SEARCH_SERVICE_URL }}" >> api-gateway/.env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> api-gateway/.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> api-gateway/.env
+          
+          # Identity Service .env
+          echo "PORT=${{ secrets.IDENTITY_SERVICE_PORT }}" > identity-service/.env
+          echo "NODE_ENV=production" >> identity-service/.env
+          echo "MONGODB_URI=${{ secrets.IDENTITY_MONGODB_URI }}" >> identity-service/.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> identity-service/.env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> identity-service/.env
+          
+          # Post Service .env
+          echo "PORT=${{ secrets.POST_SERVICE_PORT }}" > post-service/.env
+          echo "NODE_ENV=production" >> post-service/.env
+          echo "MONGODB_URI=${{ secrets.POST_MONGODB_URI }}" >> post-service/.env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> post-service/.env
+          echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> post-service/.env
+          
+          # Media Service .env
+          echo "PORT=${{ secrets.MEDIA_SERVICE_PORT }}" > media-service/.env
+          echo "NODE_ENV=production" >> media-service/.env
+          echo "MONGODB_URI=${{ secrets.MEDIA_MONGODB_URI }}" >> media-service/.env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> media-service/.env
+          echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> media-service/.env
+          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> media-service/.env
+          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> media-service/.env
+          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> media-service/.env
+          
+          # Search Service .env
+          echo "PORT=${{ secrets.SEARCH_SERVICE_PORT }}" > search-service/.env
+          echo "NODE_ENV=production" >> search-service/.env
+          echo "MONGODB_URI=${{ secrets.SEARCH_MONGODB_URI }}" >> search-service/.env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> search-service/.env
+          echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> search-service/.env
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker images
+        run: |
+          docker-compose -f docker-compose.yml build
+          docker-compose -f docker-compose.yml push
+
+  deploy: 
+    needs: build
+    runs-on: ubuntu-latest      
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Add VPS SSH host key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 46.101.90.114 >> ~/.ssh/known_hosts
+
+      - name: Set up SSH key for authentication
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: SSH into VPS and deploy
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: 46.101.90.114
+          username: root
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd NodeJS-Express-Microservices
+            git pull origin main
+            
+            # Create .env files on VPS
+            echo "PORT=${{ secrets.API_GATEWAY_PORT }}" > api-gateway/.env
+            echo "NODE_ENV=production" >> api-gateway/.env
+            echo "IDENTITY_SERVICE_URL=${{ secrets.IDENTITY_SERVICE_URL }}" >> api-gateway/.env
+            echo "POST_SERVICE_URL=${{ secrets.POST_SERVICE_URL }}" >> api-gateway/.env
+            echo "MEDIA_SERVICE_URL=${{ secrets.MEDIA_SERVICE_URL }}" >> api-gateway/.env
+            echo "SEARCH_SERVICE_URL=${{ secrets.SEARCH_SERVICE_URL }}" >> api-gateway/.env
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> api-gateway/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> api-gateway/.env
+            
+            echo "PORT=${{ secrets.IDENTITY_SERVICE_PORT }}" > identity-service/.env
+            echo "NODE_ENV=production" >> identity-service/.env
+            echo "MONGODB_URI=${{ secrets.IDENTITY_MONGODB_URI }}" >> identity-service/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> identity-service/.env
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> identity-service/.env
+            
+            echo "PORT=${{ secrets.POST_SERVICE_PORT }}" > post-service/.env
+            echo "NODE_ENV=production" >> post-service/.env
+            echo "MONGODB_URI=${{ secrets.POST_MONGODB_URI }}" >> post-service/.env
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> post-service/.env
+            echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> post-service/.env
+            
+            echo "PORT=${{ secrets.MEDIA_SERVICE_PORT }}" > media-service/.env
+            echo "NODE_ENV=production" >> media-service/.env
+            echo "MONGODB_URI=${{ secrets.MEDIA_MONGODB_URI }}" >> media-service/.env
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> media-service/.env
+            echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> media-service/.env
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> media-service/.env
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API }}" >> media-service/.env
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRE }}" >> media-service/.env
+            
+            echo "PORT=${{ secrets.SEARCH_SERVICE_PORT }}" > search-service/.env
+            echo "NODE_ENV=production" >> search-service/.env
+            echo "MONGODB_URI=${{ secrets.SEARCH_MONGODB_URI }}" >> search-service/.env
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> search-service/.env
+            echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> search-service/.env
+            
+            docker-compose down
+            docker-compose up -d
+
+      - name: Debug SSH connection (optional)
+        run: |
+          ssh -v -i ~/.ssh/id_rsa root@46.101.90.114 "echo 'SSH connection successful'"
+        continue-on-error: true
