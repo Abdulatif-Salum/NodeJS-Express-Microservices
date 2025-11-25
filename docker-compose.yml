@@ -13,6 +13,7 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
+    restart: unless-stopped
 
   identity-service:
     build: ./identity-service
@@ -24,6 +25,7 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
+    restart: unless-stopped
 
   post-service:
     build: ./post-service
@@ -35,6 +37,7 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
+    restart: unless-stopped
 
   media-service:
     build: ./media-service
@@ -46,6 +49,7 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
+    restart: unless-stopped
 
   search-service:
     build: ./search-service
@@ -57,19 +61,30 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
+    restart: unless-stopped
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    restart: unless-stopped
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "q", "ping"]
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
+
+volumes:
+  redis-data:
+  rabbitmq-data:
