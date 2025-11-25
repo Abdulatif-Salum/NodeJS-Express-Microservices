@@ -118,19 +118,19 @@ jobs:
             
             echo "PORT=${{ secrets.IDENTITY_SERVICE_PORT }}" > identity-service/.env
             echo "NODE_ENV=production" >> identity-service/.env
-            echo "MONGODB_URI=${{ secrets.IDENTITY_MONGODB_URI }}" >> identity-service/.env
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> identity-service/.env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> identity-service/.env
             echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> identity-service/.env
             
             echo "PORT=${{ secrets.POST_SERVICE_PORT }}" > post-service/.env
             echo "NODE_ENV=production" >> post-service/.env
-            echo "MONGODB_URI=${{ secrets.POST_MONGODB_URI }}" >> post-service/.env
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> post-service/.env
             echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> post-service/.env
             echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> post-service/.env
             
             echo "PORT=${{ secrets.MEDIA_SERVICE_PORT }}" > media-service/.env
             echo "NODE_ENV=production" >> media-service/.env
-            echo "MONGODB_URI=${{ secrets.MEDIA_MONGODB_URI }}" >> media-service/.env
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> media-service/.env
             echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> media-service/.env
             echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> media-service/.env
             echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> media-service/.env
@@ -139,7 +139,7 @@ jobs:
             
             echo "PORT=${{ secrets.SEARCH_SERVICE_PORT }}" > search-service/.env
             echo "NODE_ENV=production" >> search-service/.env
-            echo "MONGODB_URI=${{ secrets.SEARCH_MONGODB_URI }}" >> search-service/.env
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> search-service/.env
             echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> search-service/.env
             echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> search-service/.env
             
